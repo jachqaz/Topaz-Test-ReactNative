@@ -117,16 +117,24 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Expo Prebuild (iOS)
-        run: npx expo prebuild --platform ios --no-install
+        run: npx expo prebuild --platform ios
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install --repo-update
 
       - name: Build iOS archive (sin firma)
         run: |
           cd ios
-          xcodebuild -workspace Topaz.xcworkspace \
-            -scheme Topaz \
+          WORKSPACE=$(ls -d *.xcworkspace | head -n1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          echo "Workspace: $WORKSPACE | Scheme: $SCHEME"
+          xcodebuild -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/Topaz-${{ needs.quality_gate.outputs.build-number }}.xcarchive \
+            -archivePath "build/${SCHEME}-${{ needs.quality_gate.outputs.build-number }}.xcarchive" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \

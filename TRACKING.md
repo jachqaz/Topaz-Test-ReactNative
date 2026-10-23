@@ -111,7 +111,18 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
-### Fix CI 2026-10-23 (7) — DEFINITIVO: lock no portable Windows→Linux, CI usa `npm install`
+### Fix CI 2026-10-23 (8) — Build iOS: faltaba el .xcworkspace (CocoaPods)
+- **Síntoma:** `Build iOS archive` fallaba con `xcodebuild: error: 'Topaz.xcworkspace' does not exist`.
+  (Typecheck & Test y Build Android ya pasaban con `npm install`.)
+- **Causa raíz:** el job hacía `expo prebuild --platform ios --no-install`, que **salta `pod install`**;
+  el `.xcworkspace` lo genera CocoaPods, no `prebuild`. Sin pods → no hay workspace → xcodebuild falla.
+- **Fix:** (1) `expo prebuild --platform ios` sin `--no-install` + paso explícito `pod install --repo-update`;
+  (2) el nombre de workspace/scheme se detecta dinámicamente (`ls *.xcworkspace`) en vez de asumir `Topaz`.
+- **Nota "pasos repetidos":** los pasos Set up job / Checkout / Setup Node / Install / Post* / Complete
+  que se ven en cada job son el ciclo estándar que GitHub Actions añade a CADA job (runners aislados),
+  no duplicación a eliminar. Los 3 jobs (quality_gate, android, ios) se auto-provisionan por diseño.
+
+### Fix CI 2026-10-23 (7) — lock no portable Windows→Linux, CI usa `npm install`
 - **Evidencia:** el run #7 sobre el commit correcto `0fd9112` (con `jest-preset` fijo y lock sin 0.88)
   **seguía** fallando con `EUSAGE` pidiendo `@react-native/metro-config@0.88.0`, `metro@0.87.1`, etc.
   El mismo lock pasa `npm ci` en local (Windows) pero no en el runner (Linux).
