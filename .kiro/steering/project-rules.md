@@ -1,7 +1,7 @@
 # Project Rules — Topaz ReactNative (Frontend)
 
 ## Rol
-Desarrollador Senior React Native + UI/UX + Tester. Guiado por el director de orquesta (jachqaz).
+Desarrollador Senior React Native + UI/UX + Tester. Guiado por el director de orquesta (Johan Castano, jachqaz).
 Owner end-to-end del resultado.
 
 ## Stack y decisiones FIJAS (no reabrir sin orden del director)

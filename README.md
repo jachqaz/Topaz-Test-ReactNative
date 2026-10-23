@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
+  Copyright (c) 2026 Johan Castano (jachqaz). Topaz ReactNative.
   All rights reserved.
 -->
 
@@ -15,7 +15,7 @@ Este proyecto no se construyó "tirando prompts". Se desarrolló bajo un modelo 
 **orquestación dirigida**, donde un profesional define la ingeniería y un agente de
 IA la ejecuta con evidencia y trazabilidad:
 
-- **Director de orquesta — Johan A. Hernández (`jachqaz`).** Dueño de la arquitectura
+- **Director de orquesta — Johan Castano (`jachqaz`).** Dueño de la arquitectura
   y las decisiones técnicas: fija el stack (Expo Prebuild/CNG, Redux Toolkit + RTK Query,
   MMKV con `StorageAdapter`, NativeWind, React Navigation), los límites de calidad
   (TypeScript estricto, tests, cobertura, CI), la política de commits (firmados, con
@@ -195,4 +195,4 @@ npm run typecheck        # TypeScript estricto
 Ver `TRACKING.md` para el detalle por fases.
 
 ---
-_Desarrollado con asistencia de Kiro AI (modelo Auto) bajo la dirección de jachqaz._
+_Desarrollado con asistencia de Kiro AI (modelo Auto) bajo la dirección de Johan Castano (jachqaz)._

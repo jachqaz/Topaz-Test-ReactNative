@@ -1,11 +1,11 @@
 <!--
-  Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
+  Copyright (c) 2026 Johan Castano (jachqaz). Topaz ReactNative.
   All rights reserved.
 -->
 
 # TRACKING.md — Topaz ReactNative (Frontend)
 
-**Director de orquesta:** jachqaz (`jach_1997@hotmail.com`) · **Agente:** Kiro (Auto), guiado por el director.
+**Director de orquesta:** Johan Castano (jachqaz) (`jach_1997@hotmail.com`) · **Agente:** Kiro (Auto), guiado por el director.
 **Repo:** https://github.com/jachqaz/Topaz-Test-ReactNative.git · **Rama de trabajo:** `develop`
 **Stack:** Expo SDK 57 · React Native 0.86 · React 19.2 · TypeScript estricto.
 
@@ -91,6 +91,14 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Diagnóstico de conexión front→back: la cadena NUNCA estuvo rota (back vivo en 8080, `adb reverse`
   activo, base URL = `localhost:8080/api`, sin mocks que enmascaren). El "no veo consultas" era falta de
   observabilidad, no de conectividad; confirmado dummyjson→back→front.
+
+### Documentación 2026-10-23 — nombre del director
+- Reemplazo en la documentación: `Johan A. Hernández (jachqaz)` → `Johan Castano (jachqaz)`;
+  menciones de `jachqaz` como autoría → `Johan Castano (jachqaz)`. **No** se tocaron las URLs de
+  GitHub (`github.com/jachqaz/...`) ni la config `user.name = jachqaz` (identidad real de git).
+  Archivos del repo: `README.md` (3), `TRACKING.md` (2), `.kiro/steering/project-rules.md` (1).
+- **Rutina adoptada:** tras cada cambio → commit firmado (`-s`, sin push) con preproceso +
+  actualización de este `.md` de seguimiento.
 
 ### READMEs, CI y preproceso 2026-10-23
 - **READMEs** de ambos proyectos: nueva sección "Modelo de trabajo: orquestación humano + agente"
