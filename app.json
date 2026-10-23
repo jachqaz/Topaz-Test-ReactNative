@@ -1,15 +1,19 @@
 {
   "expo": {
-    "name": "Topaz-ReactNative",
+    "name": "Topaz",
     "slug": "Topaz-ReactNative",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "scheme": "topaz",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jachqaz.topaz"
     },
     "android": {
+      "package": "com.jachqaz.topaz",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

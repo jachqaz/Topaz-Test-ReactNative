@@ -1,0 +1,140 @@
+# Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
+# CI/CD - Test + artefactos nativos (.apk Android, archive/.ipa iOS) vía Expo Prebuild (CNG)
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop, master ]
+
+env:
+  NODE_VERSION: '24'
+  JAVA_VERSION: '21'
+
+jobs:
+  # =============================================================
+  # QUALITY GATE: typecheck + tests con cobertura
+  # =============================================================
+  quality_gate:
+    name: Typecheck & Test
+    runs-on: ubuntu-latest
+    outputs:
+      build-number: ${{ steps.build-info.outputs.build-number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test (coverage)
+        run: npm run test:ci
+
+      - name: Build info
+        id: build-info
+        run: echo "build-number=${{ github.run_number }}-$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+  # =============================================================
+  # ANDROID: Expo Prebuild + Gradle assembleRelease -> .apk
+  # =============================================================
+  build_android:
+    name: Build Android (.apk)
+    needs: quality_gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Expo Prebuild (Android)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build APK (debug)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: topaz-android-apk-${{ needs.quality_gate.outputs.build-number }}
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+  # =============================================================
+  # iOS: Expo Prebuild + xcodebuild archive -> .xcarchive (.ipa)
+  # =============================================================
+  build_ios:
+    name: Build iOS (archive)
+    needs: quality_gate
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Expo Prebuild (iOS)
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Build iOS archive (sin firma)
+        run: |
+          cd ios
+          xcodebuild -workspace Topaz.xcworkspace \
+            -scheme Topaz \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Topaz-${{ needs.quality_gate.outputs.build-number }}.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+      - name: Upload iOS archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: topaz-ios-archive-${{ needs.quality_gate.outputs.build-number }}
+          path: ios/build/*.xcarchive
+          retention-days: 30
