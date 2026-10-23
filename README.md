@@ -9,10 +9,26 @@ Mini-tienda de productos construida con React Native (Expo). Consume el backend
 **Topaz Products API** (o DummyJSON directamente) y permite explorar productos,
 ver su detalle y guardar favoritos localmente.
 
-## Roles del proyecto
+## Modelo de trabajo: orquestación humano + agente
 
-- **Director de orquesta:** Johan A. Hernández (`jachqaz`) — define objetivos, decisiones técnicas y prioridades.
-- **Agente de desarrollo:** Kiro (modelo Auto) — ejecuta guiado por el director, con evidencia y trazabilidad.
+Este proyecto no se construyó "tirando prompts". Se desarrolló bajo un modelo de
+**orquestación dirigida**, donde un profesional define la ingeniería y un agente de
+IA la ejecuta con evidencia y trazabilidad:
+
+- **Director de orquesta — Johan A. Hernández (`jachqaz`).** Dueño de la arquitectura
+  y las decisiones técnicas: fija el stack (Expo Prebuild/CNG, Redux Toolkit + RTK Query,
+  MMKV con `StorageAdapter`, NativeWind, React Navigation), los límites de calidad
+  (TypeScript estricto, tests, cobertura, CI), la política de commits (firmados, con
+  preprocesado, sin push automático) y valida cada entrega contra evidencia real. Dirige
+  el diagnóstico de los problemas difíciles exigiendo causa raíz, no parches.
+- **Agente ejecutor — Kiro (modelo Auto).** Traduce la intención del director en trabajo
+  accionable: implementa, instrumenta, mide y verifica (typecheck, tests, builds, logs),
+  y reporta con datos. Trabaja guiado, dentro de las decisiones y restricciones del director.
+
+El valor está en la **dirección especializada**: saber qué pedir, cómo acotar el problema,
+qué evidencia exigir y cuándo rechazar una solución. El agente acelera la ejecución; el
+criterio de ingeniería y la responsabilidad del resultado son del director. La trazabilidad
+de cada decisión (qué, por qué y con qué evidencia) vive en `TRACKING.md`.
 
 ## Stack y decisiones
 
@@ -57,26 +73,61 @@ un doble en memoria en los tests (sin JSI nativo).
 
 ## Prerrequisitos
 
-- Node 24 (`vfox use node@24`)
-- Para builds nativos: Android Studio / Xcode (Expo Prebuild)
-- **Development Build** (NO Expo Go): la app usa MMKV (JSI) y New Architecture.
+- **Node 20 o superior** (probado con Node 24).
+- **JDK 21** (Temurin/Zulu) y `JAVA_HOME` apuntando a él.
+- **Android Studio** con el Android SDK (Platform 36 / build-tools 36) y un emulador, o un **device físico** con *Depuración USB* activada.
+- `adb` en el `PATH` (viene con el Android SDK, en `platform-tools`).
+- **NO uses Expo Go**: la app usa MMKV (JSI) y New Architecture, así que requiere un **Development Build** compilado localmente.
 
-## Ejecución en device físico Android (USB)
+## Clonado y ejecución desde cero
 
-Estos son los cambios aplicados para compilar y correr en un **device físico**:
+1. **Clona el repositorio:**
 
-- `npm run android` / `npm run ios` ahora usan `expo run:android` / `expo run:ios`
-  (Development Build nativo), en vez de `expo start --android` (que requería Expo Go).
-- Dependencias nativas añadidas: `react-native-nitro-modules` (requerida por MMKV v4)
-  y `@react-native-community/cli`.
-- `tailwindcss` fijado a `3.4.19` (NativeWind 4 no es compatible con Tailwind 4).
+   ```bash
+   git clone https://github.com/jachqaz/Topaz-Test-ReactNative.git
+   cd Topaz-Test-ReactNative
+   ```
 
-```bash
-npm install
-npx expo prebuild                # genera android/ e ios/ (CNG) — solo la 1ª vez o al cambiar nativo
-npm run adb:reverse              # adb reverse tcp:8081 + tcp:8080  (Metro + backend)
-npm run android                  # compila e instala el Development Build en el device
-```
+2. **Instala dependencias:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Levanta el backend** (en otra terminal; ver el README del back). Debe quedar
+   escuchando en `http://localhost:8080`:
+
+   ```bash
+   cd ../Topaz-Test-JavaSpringBoot
+   ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
+   ```
+
+4. **Conecta el device o abre el emulador** y mapea los puertos del PC al teléfono:
+
+   ```bash
+   npm run adb:reverse           # adb reverse tcp:8081 (Metro) + tcp:8080 (backend)
+   ```
+
+5. **Compila e instala el Development Build:**
+
+   ```bash
+   npx expo prebuild             # genera android/ e ios/ (CNG) — solo la 1ª vez
+   npx expo run:android          # compila + instala + abre en el device/emulador
+   ```
+
+   A partir de la segunda vez, para cambios solo-JS basta con Metro:
+
+   ```bash
+   npm start                     # expo start
+   ```
+
+   Si alguna vez los estilos de NativeWind no se aplican tras cambiar la
+   configuración de Tailwind/Babel/Metro, limpia la caché y reinicia:
+
+   ```bash
+   npm run nw:clean              # borra la caché de react-native-css-interop
+   npm run start:clean           # expo start --clear
+   ```
 
 ## Conexión con el backend Topaz (reproducible)
 
@@ -135,7 +186,8 @@ npm run typecheck        # TypeScript estricto
 ## Notas técnicas
 
 - Expo SDK 57 (RN 0.86 · React 19.2) corre New Architecture; MMKV v4 (Nitro) usa `createMMKV`.
-- Estilos con **NativeWind 4.2.7** (soporte oficial SDK 57). En SDK 58 NativeWind 4.2.7 no transforma `className` (incompatibilidad), por eso se fijó SDK 57.
+- Estilos con **NativeWind 4.2.7** sobre **Tailwind 3.4.19** (NativeWind 4 no es compatible con Tailwind 4).
+- Si tras cambiar la configuración de Tailwind/Babel/Metro los estilos `className` no aplican, limpia la caché del transformer: `npm run nw:clean` y luego `npm run start:clean`.
 - Los tests de componente usan `react-test-renderer` directo por compatibilidad con React 19.
 
 ## Estado

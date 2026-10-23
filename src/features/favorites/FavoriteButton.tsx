@@ -29,10 +29,19 @@ export function FavoriteButton({ isFavorite, onToggle }: FavoriteButtonProps) {
   return (
     <Pressable accessibilityRole="button" onPress={handlePress}>
       <Animated.View
-        style={animatedStyle}
-        className={`flex-row items-center justify-center gap-2 rounded-2xl px-6 py-4 ${
-          isFavorite ? 'bg-rose-500' : 'bg-primary'
-        } active:opacity-90`}
+        style={[
+          animatedStyle,
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            borderRadius: 16,
+            paddingHorizontal: 24,
+            paddingVertical: 16,
+            backgroundColor: isFavorite ? '#f43f5e' : '#2563eb',
+          },
+        ]}
       >
         <Text className="text-xl text-white">{isFavorite ? '♥' : '♡'}</Text>
         <Text className="text-base font-bold text-white">

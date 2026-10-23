@@ -76,8 +76,7 @@ export function FavoritesScreen() {
           data={favorites}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          contentContainerClassName="p-4 gap-3"
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           ItemSeparatorComponent={() => <View className="h-3" />}
           showsVerticalScrollIndicator={false}
         />

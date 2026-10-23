@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ProductsListScreen } from '../../features/products/ProductsListScreen';
@@ -29,6 +30,9 @@ function ProductsStack() {
 
 /** Navegación raíz: bottom tabs Productos y Favoritos, claramente visibles. */
 export function RootNavigator() {
+  const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom;
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -37,8 +41,9 @@ export function RootNavigator() {
         tabBarActiveTintColor: ACTIVE,
         tabBarInactiveTintColor: INACTIVE,
         tabBarStyle: {
-          height: Platform.OS === 'ios' ? 88 : 68,
+          height: (Platform.OS === 'ios' ? 60 : 62) + bottomInset,
           paddingTop: 8,
+          paddingBottom: bottomInset > 0 ? bottomInset : 10,
           borderTopWidth: 0,
           elevation: 12,
           shadowColor: '#0f172a',

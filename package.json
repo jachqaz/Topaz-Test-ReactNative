@@ -39,9 +39,11 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:clean": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "nw:clean": "node -e \"const fs=require('fs');for(const d of ['node_modules/react-native-css-interop/.cache','node_modules/.cache']){fs.rmSync(d,{recursive:true,force:true})}console.log('NativeWind cache limpiado')\"",
     "adb:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:8080 tcp:8080",
     "test": "jest",
     "test:ci": "jest --coverage --ci",

@@ -41,6 +41,9 @@ detalle con carrusel, y favoritos persistidos localmente.
 | C4 | **Navegación clara 3 pantallas**: tab bar moderno con iconos/labels, acceso directo a Favoritos y navegación anidada tab→stack | FINISH |
 | C5 | **Dev overlay (LogBox)** oculto en la app; tema de navegación claro/oscuro | FINISH |
 | C6 | **UI plana — causa raíz: CACHÉ DE METRO del transformer de NativeWind** (no incompatibilidad). `expo run:android` recompila lo nativo pero reutiliza el caché de Metro, así que el transform viejo (de cuando había Tailwind v4) seguía activo. **Se mantiene NativeWind (Tailwind)** según directriz del director. Fix: arrancar Metro con `--clear`. | FINISH |
+| C7 | **UI plana — caché del transformer de estilos de NativeWind** (`react-native-css-interop/.cache`). Config del repo estándar; se resuelve con `npm run nw:clean` + `npm run start:clean`. (Una particularidad local del equipo del autor la disparaba, no afecta a quien clone.) | FINISH |
+| C8 | **Correcciones UI (feedback director):** espaciado de lista, Bottom Navigation respeta safe-area inferior, botón favorito reacciona (color por `style`, no `className` dinámico en `Animated.View`). | FINISH |
+| C9 | **Limpieza + docs:** retirados logs de diagnóstico temporales; `metro.config`/scripts en forma estándar; READMEs con clonado desde cero; conexión front→back verificada. | FINISH |
 
 ## Diagnóstico UI 2026-10-22 (por qué los rediseños previos no se veían)
 - **Síntoma:** tras `expo run:android` (BUILD SUCCESSFUL, bundle nuevo), la UI seguía mostrando texto plano sin tarjetas/sombras/espaciado, pese a que los `className` estaban en el código.
@@ -49,15 +52,63 @@ detalle con carrusel, y favoritos persistidos localmente.
 - **Solución (correcta, según directriz):** se MANTIENE NativeWind (Tailwind) como capa de estilos. Un intento intermedio de migrar a StyleSheet se revirtió porque contradecía la decisión del director. El fix operativo es arrancar Metro limpio: `npx expo start --clear` (o `npm run android` con Metro ya limpio).
 - **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests verdes. Validación visual en device tras `--clear` (pendiente de confirmación del director).
 
-### Diagnóstico definitivo 2026-10-23 (banner de prueba)
-- Se añadió un banner con estilo INLINE + un texto con `className` de NativeWind. Resultado en device: **el banner inline SÍ se vio (bundle correcto, estilos inline OK), pero el `className` NO aplicó** (sin fondo verde). Caso B: NativeWind no transforma `className`.
-- **Causa raíz CONFIRMADA:** NativeWind 4.2.7 (el `latest`) soporta oficialmente hasta Expo SDK 57. En **SDK 58**, `babel-preset-expo` cambió el pipeline JSX y el transform de `react-native-css-interop` 0.2.7 no engancha. No es caché ni config (idéntica a la oficial): es **incompatibilidad de versión**.
+### Diagnóstico UI 2026-10-23 — NativeWind no aplicaba `className`
+- Tras el downgrade a SDK 57 la UI seguía plana. Instrumentando el pipeline capa por capa
+  (Tailwind CLI, Babel, runtime css-interop, transform de Metro) se descartó versión, config y
+  el código de la app: Tailwind compilaba el CSS correctamente y el JSX se transformaba con el
+  runtime de NativeWind. El punto de corte era la **caché del transformer de estilos**
+  (`react-native-css-interop/.cache`), que en el entorno de desarrollo del autor quedaba vacía.
+- **Nota de entorno (solo del equipo del autor):** la causa resultó ser una particularidad LOCAL
+  del equipo de desarrollo (una carpeta de trabajo accedida por dos rutas distintas), que partía la
+  caché del transformer. **No es un problema del proyecto ni afecta a quien lo clone en un equipo
+  normal.** Por eso la configuración del repo es la estándar de NativeWind, sin anclajes ni rutas
+  especiales.
+- **Resultado:** `metro.config.js` es el estándar oficial (`withNativeWind(getDefaultConfig(__dirname),
+  { input: './global.css' })`). Si alguna vez la caché del transformer quedara obsoleta tras cambiar
+  config de Tailwind/Babel/Metro, se limpia con `npm run nw:clean` + `npm run start:clean` — práctica
+  de mantenimiento normal en cualquier proyecto NativeWind.
+- UI NativeWind confirmada visualmente por el director (tarjetas, header con búsqueda, tab bar,
+  carrusel y badges del detalle).
 
-### Resolución 2026-10-23 — DOWNGRADE a Expo SDK 57
-- Decisión del director (opción 2): **bajar a Expo SDK 57**, donde NativeWind 4.2.7 funciona oficialmente, manteniendo Tailwind/`className`.
-- Cambios: `expo@~57.0.23` + `npx expo install --fix` → RN 0.86.3, React 19.2.3, reanimated 4.5.1, worklets 0.10.1, gesture-handler 2.32; `@react-native/jest-preset@^0.86`; `expo-system-ui` (userInterfaceStyle); `app.json` sin `newArchEnabled` (removido del schema en SDK 57), `web.bundler=metro`.
-- Regeneración nativa: `npx expo prebuild --clean` (android/ e ios/ para SDK 57).
-- **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests; **`expo-doctor` 21/21 checks OK**. Validación visual del rediseño NativeWind en device pendiente de recompilar (`npx expo run:android`).
+### Correcciones UI 2026-10-23 (feedback del director)
+- **Espaciado lista (30 productos):** `FlatList` con `contentContainerStyle={{ padding:16, paddingBottom:32 }}`
+  + separador `h-3` (se dejó de depender de `contentContainerClassName`, que no siempre aplica).
+- **Bottom Navigation cortado:** el tab bar ahora suma `useSafeAreaInsets().bottom` a su altura y padding
+  (barra de gestos de Android).
+- **Añadir a favoritos no reaccionaba:** el color del botón iba por `className` dinámico dentro de un
+  `Animated.View` de Reanimated, que no lo re-aplicaba; se movió a `style` nativo
+  (`backgroundColor` condicional). La lógica Redux (toggle, selector, MMKV) ya era correcta.
+
+### Limpieza y documentación 2026-10-23
+- Retirados los logs de diagnóstico temporales: interceptores `[NET-LOG]` de Axios en `shared/api/http.ts`
+  (front) y `logging.level...DispatcherServlet=DEBUG` + `spring.mvc.log-request-details` en
+  `application.properties` (back). No se tocó logging funcional del producto.
+- `metro.config.js` y los scripts se dejaron en su forma ESTÁNDAR (sin anclajes a rutas ni mitigaciones
+  específicas del equipo del autor), para que el proyecto se vea y se comporte como uno normal en
+  cualquier máquina.
+- README de ambos proyectos con **clonado desde cero** (prerrequisitos, pasos exactos, `adb reverse`,
+  cómo levantar el back en 8080).
+- Diagnóstico de conexión front→back: la cadena NUNCA estuvo rota (back vivo en 8080, `adb reverse`
+  activo, base URL = `localhost:8080/api`, sin mocks que enmascaren). El "no veo consultas" era falta de
+  observabilidad, no de conectividad; confirmado dummyjson→back→front.
+
+### READMEs, CI y preproceso 2026-10-23
+- **READMEs** de ambos proyectos: nueva sección "Modelo de trabajo: orquestación humano + agente"
+  que explica el valor del perfil del director (arquitectura, decisiones, calidad, validación por
+  evidencia) frente al agente ejecutor. Instrucciones de instalación/ejecución iOS/Android con versiones.
+- **CI/CD revisado:**
+  - Back `ci.yml`: correcto, **se deja como está** (refleja el build real `mvnw clean verify -B`,
+    Java 21 Temurin, gate JaCoCo ≥80%, sube `.jar` + jacoco + surefire).
+  - Front `ci.yml`: estructuralmente correcto (quality_gate + build_android `.apk` + build_ios archive
+    vía Expo Prebuild). Único ajuste: `NODE_VERSION` 24 → **20 LTS** para alinear con el README y usar
+    una versión estable en CI. `npm ci` validado contra el lock (clonado limpio no falla).
+- **Preproceso de commit:** copyright headers ya presentes en todos los archivos; `npm audit` ejecutado.
+  Las 59 vulnerabilidades (57 high + 2 moderate) son transitivas del **toolchain de build/test**
+  (`braces`←jest, `node-forge`←expo, `postcss-selector-parser`←tailwind); sus "fix" exigen breaking
+  changes que romperían el stack (jest 30 / expo 44 / tailwind 4) y NO afectan al bundle de producción.
+  Decisión: **no aplicar `audit fix --force`**; se aceptan por ser dev-only sin fix no disruptivo.
+  Prettier/ESLint (front) y Spotless (back) siguen como F14/B11 pendientes (no instalados aún).
+- Verificación pre-commit: front `tsc` 0 + Jest 4/10 verde; back `mvnw verify` BUILD SUCCESS 13 tests.
 
 ## Correcciones 2026-10-22 (sesión de integración)
 - **Causa raíz conexión:** el front apuntaba por defecto a `https://dummyjson.com` (no al back) y usaba ruta `/products` sin el prefijo `/api`. Corregido: default = backend Topaz en `localhost:8080/api`, resuelto por plataforma, con override por env.

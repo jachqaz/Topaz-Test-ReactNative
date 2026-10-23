@@ -9,7 +9,7 @@ on:
     branches: [ develop, master ]
 
 env:
-  NODE_VERSION: '24'
+  NODE_VERSION: '20'
   JAVA_VERSION: '21'
 
 jobs:

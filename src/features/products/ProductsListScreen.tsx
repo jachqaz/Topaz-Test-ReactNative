@@ -77,8 +77,7 @@ export function ProductsListScreen({ navigation }: ProductsListScreenProps) {
         data={filtered}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
-        contentContainerClassName="p-4 gap-3"
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         ItemSeparatorComponent={() => <View className="h-3" />}
         initialNumToRender={8}
         windowSize={10}
