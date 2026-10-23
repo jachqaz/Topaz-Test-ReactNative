@@ -3,13 +3,12 @@
  * All rights reserved.
  */
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProductsQuery } from './productsApi';
 import { ProductCard } from '../../shared/ui/ProductCard';
 import { Loader } from '../../shared/ui/Loader';
 import { ErrorView } from '../../shared/ui/ErrorView';
-import { colors, radius, spacing, shadow } from '../../shared/ui/theme';
 import type { Product } from '../../types/product';
 import type { ProductsListScreenProps } from '../../app/navigation/types';
 
@@ -29,7 +28,9 @@ export function ProductsListScreen({ navigation }: ProductsListScreenProps) {
     const q = query.trim().toLowerCase();
     if (!q) return data;
     return data.filter(
-      (p) => p.title.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q),
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q),
     );
   }, [data, query]);
 
@@ -38,24 +39,35 @@ export function ProductsListScreen({ navigation }: ProductsListScreenProps) {
     [goToDetail],
   );
 
-  if (isLoading) return <Loader message="Cargando productos…" />;
-  if (isError) return <ErrorView message="No se pudieron cargar los productos." onRetry={refetch} />;
+  if (isLoading) {
+    return <Loader message="Cargando productos…" />;
+  }
+
+  if (isError) {
+    return <ErrorView message="No se pudieron cargar los productos." onRetry={refetch} />;
+  }
 
   return (
-    <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
-        <Text style={styles.heading}>Productos</Text>
-        <Text style={styles.sub}>
+    <View className="flex-1 bg-slate-50 dark:bg-slate-950">
+      {/* Header */}
+      <View
+        className="bg-white px-5 pb-4 dark:bg-slate-900"
+        style={{ paddingTop: insets.top + 12 }}
+      >
+        <Text className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">
+          Productos
+        </Text>
+        <Text className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
           {filtered.length} {filtered.length === 1 ? 'artículo' : 'artículos'}
         </Text>
-        <View style={styles.search}>
-          <Text style={styles.searchIcon}>🔍</Text>
+        <View className="mt-3 flex-row items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 dark:bg-slate-800">
+          <Text className="text-slate-400">🔍</Text>
           <TextInput
             value={query}
             onChangeText={setQuery}
             placeholder="Buscar por nombre o categoría"
-            placeholderTextColor={colors.textFaint}
-            style={styles.searchInput}
+            placeholderTextColor="#94a3b8"
+            className="flex-1 text-base text-slate-900 dark:text-slate-100"
             returnKeyType="search"
           />
         </View>
@@ -65,8 +77,9 @@ export function ProductsListScreen({ navigation }: ProductsListScreenProps) {
         data={filtered}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+        contentContainerClassName="p-4 gap-3"
+        contentContainerStyle={{ paddingBottom: 24 }}
+        ItemSeparatorComponent={() => <View className="h-3" />}
         initialNumToRender={8}
         windowSize={10}
         removeClippedSubviews
@@ -74,40 +87,13 @@ export function ProductsListScreen({ navigation }: ProductsListScreenProps) {
         refreshing={isFetching}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>Sin resultados para “{query}”.</Text>
+          <View className="items-center justify-center py-20">
+            <Text className="text-center text-slate-500 dark:text-slate-400">
+              Sin resultados para “{query}”.
+            </Text>
           </View>
         }
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.lg,
-    ...shadow.header,
-  },
-  heading: { fontSize: 30, fontWeight: '800', color: colors.text },
-  sub: { marginTop: 2, fontSize: 13, color: colors.textMuted },
-  search: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    marginTop: spacing.md,
-  },
-  searchIcon: { color: colors.textFaint },
-  searchInput: { flex: 1, fontSize: 15, color: colors.text, padding: 0 },
-  listContent: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  empty: { alignItems: 'center', paddingVertical: 80 },
-  emptyText: { textAlign: 'center', color: colors.textMuted },
-});

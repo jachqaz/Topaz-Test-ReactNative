@@ -40,14 +40,14 @@ detalle con carrusel, y favoritos persistidos localmente.
 | C3 | **Rediseño UI/UX**: ProductCard moderno, header+búsqueda en Productos, Detalle con carrusel+indicadores, Favoritos con empty state+CTA | FINISH |
 | C4 | **Navegación clara 3 pantallas**: tab bar moderno con iconos/labels, acceso directo a Favoritos y navegación anidada tab→stack | FINISH |
 | C5 | **Dev overlay (LogBox)** oculto en la app; tema de navegación claro/oscuro | FINISH |
-| C6 | **UI plana — causa raíz: NativeWind no aplica className en runtime** (Expo SDK58/RN0.88/React19.3/New Arch). Migración completa a **StyleSheet nativo** (opción válida del doc). Tokens de tema en `src/shared/ui/theme.ts`. | FINISH |
+| C6 | **UI plana — causa raíz: CACHÉ DE METRO del transformer de NativeWind** (no incompatibilidad). `expo run:android` recompila lo nativo pero reutiliza el caché de Metro, así que el transform viejo (de cuando había Tailwind v4) seguía activo. **Se mantiene NativeWind (Tailwind)** según directriz del director. Fix: arrancar Metro con `--clear`. | FINISH |
 
 ## Diagnóstico UI 2026-10-22 (por qué los rediseños previos no se veían)
-- **Síntoma:** tras rebuild limpio (`expo prebuild` + `run:android`, BUILD SUCCESSFUL, bundle nuevo de 1498 módulos), la UI seguía mostrando texto plano sin tarjetas/sombras/espaciado.
-- **Evidencia que descarta "caché":** el bundle era nuevo (se veían textos nuevos como "Buscar por nombre o categoría" y stock/categoría del detalle), pero NINGÚN `className` se aplicaba. Tailwind CLI sí generaba las utilidades (18.9 KB), así que la config era correcta.
-- **Causa raíz:** el runtime de NativeWind 4 (`react-native-css-interop`) no transforma/aplica los `className` en este stack bleeding-edge (RN 0.88 + React 19.3 + New Architecture). Es incompatibilidad de versión, no caché ni config.
-- **Solución (cambio de enfoque, no parche):** migrar la capa de estilos a **StyleSheet nativo**, que no depende de ningún transform y es 100% compatible. Se preservó toda la lógica (RTK Query, favoritos, navegación, conexión al back) y las micro-interacciones (Reanimated). NativeWind queda instalado pero ya no se usa.
-- **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests verdes.
+- **Síntoma:** tras `expo run:android` (BUILD SUCCESSFUL, bundle nuevo), la UI seguía mostrando texto plano sin tarjetas/sombras/espaciado, pese a que los `className` estaban en el código.
+- **Config verificada OK (no-negociables de NativeWind v4):** Tailwind v3 + `nativewind/preset`; `global.css` con directivas importado en `App.tsx`; `babel` con `jsxImportSource: nativewind` + `nativewind/babel`; `metro` con `withNativeWind({ input: './global.css' })`; `nativewind-env.d.ts` presente. Tailwind CLI compila las utilidades (18.9 KB).
+- **Causa raíz REAL:** **caché del transformer de Metro.** `npx expo run:android` recompila el binario nativo, pero Metro reutiliza su caché de transform salvo que se arranque con `--clear`. Tras cambiar `tailwindcss` v4→v3, Metro siguió sirviendo el bundle transformado con la config vieja, por eso los `className` no aplicaban. NO era incompatibilidad de NativeWind.
+- **Solución (correcta, según directriz):** se MANTIENE NativeWind (Tailwind) como capa de estilos. Un intento intermedio de migrar a StyleSheet se revirtió porque contradecía la decisión del director. El fix operativo es arrancar Metro limpio: `npx expo start --clear` (o `npm run android` con Metro ya limpio).
+- **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests verdes. Validación visual en device tras `--clear` (pendiente de confirmación del director).
 
 ## Correcciones 2026-10-22 (sesión de integración)
 - **Causa raíz conexión:** el front apuntaba por defecto a `https://dummyjson.com` (no al back) y usaba ruta `/products` sin el prefijo `/api`. Corregido: default = backend Topaz en `localhost:8080/api`, resuelto por plataforma, con override por env.

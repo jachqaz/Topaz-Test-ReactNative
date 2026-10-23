@@ -8,7 +8,6 @@ import {
   Image,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   useWindowDimensions,
@@ -21,7 +20,6 @@ import { FavoriteButton } from '../favorites/FavoriteButton';
 import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
 import { toggleFavorite } from '../favorites/favoritesSlice';
 import { selectIsFavorite } from '../favorites/selectors';
-import { colors, radius, spacing } from '../../shared/ui/theme';
 import type { ProductDetailScreenProps } from '../../app/navigation/types';
 
 /** Pantalla 2: detalle de producto con carrusel de imágenes y favorito. */
@@ -34,8 +32,13 @@ export function ProductDetailScreen({ route, navigation }: ProductDetailScreenPr
   const isFavorite = useAppSelector(selectIsFavorite(id));
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (isLoading) return <Loader message="Cargando detalle…" />;
-  if (isError || !product) return <ErrorView message="No se pudo cargar el producto." onRetry={refetch} />;
+  if (isLoading) {
+    return <Loader message="Cargando detalle…" />;
+  }
+
+  if (isError || !product) {
+    return <ErrorView message="No se pudo cargar el producto." onRetry={refetch} />;
+  }
 
   const gallery = product.images.length > 0 ? product.images : [product.thumbnail];
   const hasDiscount = product.discountPercentage > 0;
@@ -44,18 +47,21 @@ export function ProductDetailScreen({ route, navigation }: ProductDetailScreenPr
     : product.price;
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-white dark:bg-slate-950">
+      {/* Botón volver flotante sobre la imagen */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Volver"
         onPress={() => navigation.goBack()}
-        style={[styles.backBtn, { top: insets.top + spacing.sm }]}
+        className="absolute left-4 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm dark:bg-slate-800/90"
+        style={{ top: insets.top + 8 }}
       >
-        <Text style={styles.backIcon}>‹</Text>
+        <Text className="text-lg text-slate-900 dark:text-slate-100">‹</Text>
       </Pressable>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={styles.gallery}>
+        {/* Carrusel */}
+        <View className="bg-slate-100 dark:bg-slate-900">
           <FlatList
             data={gallery}
             horizontal
@@ -70,42 +76,70 @@ export function ProductDetailScreen({ route, navigation }: ProductDetailScreenPr
             )}
           />
           {gallery.length > 1 ? (
-            <View style={styles.dots}>
+            <View className="absolute bottom-3 w-full flex-row items-center justify-center gap-1.5">
               {gallery.map((_, i) => (
-                <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
+                <View
+                  key={i}
+                  className={`h-2 rounded-full ${
+                    i === activeIndex ? 'w-5 bg-primary' : 'w-2 bg-slate-300 dark:bg-slate-600'
+                  }`}
+                />
               ))}
             </View>
           ) : null}
         </View>
 
-        <View style={styles.body}>
+        {/* Info */}
+        <View className="gap-3 p-5">
           {product.category ? (
-            <Text style={styles.category}>{product.category.toUpperCase()}</Text>
+            <Text className="text-xs font-semibold uppercase tracking-wide text-primary dark:text-blue-400">
+              {product.category}
+            </Text>
           ) : null}
-          <Text style={styles.title}>{product.title}</Text>
+          <Text className="text-2xl font-extrabold leading-7 text-slate-900 dark:text-slate-50">
+            {product.title}
+          </Text>
 
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>${finalPrice.toFixed(2)}</Text>
-            {hasDiscount ? <Text style={styles.priceOld}>${product.price.toFixed(2)}</Text> : null}
+          <View className="flex-row flex-wrap items-center gap-2">
+            <View className="flex-row items-end gap-2">
+              <Text className="text-3xl font-black text-slate-900 dark:text-slate-50">
+                ${finalPrice.toFixed(2)}
+              </Text>
+              {hasDiscount ? (
+                <Text className="pb-1 text-base font-medium text-slate-400 line-through">
+                  ${product.price.toFixed(2)}
+                </Text>
+              ) : null}
+            </View>
             {hasDiscount ? (
-              <View style={styles.discountPill}>
-                <Text style={styles.discountText}>-{product.discountPercentage.toFixed(0)}%</Text>
+              <View className="rounded-full bg-emerald-50 px-2.5 py-1 dark:bg-emerald-500/15">
+                <Text className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  -{product.discountPercentage.toFixed(0)}%
+                </Text>
               </View>
             ) : null}
           </View>
 
-          <View style={styles.metaRow}>
-            <View style={styles.ratingPill}>
-              <Text style={styles.star}>★</Text>
-              <Text style={styles.ratingText}>{product.rating.toFixed(2)}</Text>
+          <View className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-1 rounded-full bg-amber-50 px-3 py-1 dark:bg-amber-500/15">
+              <Text className="text-amber-500">★</Text>
+              <Text className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                {product.rating.toFixed(2)}
+              </Text>
             </View>
-            {product.brand ? <Text style={styles.meta}>{product.brand}</Text> : null}
-            <Text style={styles.meta}>Stock: {product.stock}</Text>
+            {product.brand ? (
+              <Text className="text-sm text-slate-500 dark:text-slate-400">{product.brand}</Text>
+            ) : null}
+            <Text className="text-sm text-slate-500 dark:text-slate-400">
+              Stock: {product.stock}
+            </Text>
           </View>
 
-          <Text style={styles.desc}>{product.description}</Text>
+          <Text className="mt-1 text-base leading-6 text-slate-600 dark:text-slate-300">
+            {product.description}
+          </Text>
 
-          <View style={{ marginTop: spacing.lg }}>
+          <View className="mt-4">
             <FavoriteButton
               isFavorite={isFavorite}
               onToggle={() => dispatch(toggleFavorite(product))}
@@ -116,63 +150,3 @@ export function ProductDetailScreen({ route, navigation }: ProductDetailScreenPr
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.surface },
-  backBtn: {
-    position: 'absolute',
-    left: spacing.lg,
-    zIndex: 10,
-    height: 40,
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-  },
-  backIcon: { fontSize: 24, lineHeight: 26, color: colors.text },
-  gallery: { backgroundColor: colors.surfaceAlt },
-  dots: {
-    position: 'absolute',
-    bottom: spacing.md,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  dot: { height: 8, width: 8, borderRadius: 999, backgroundColor: '#cbd5e1' },
-  dotActive: { width: 20, backgroundColor: colors.primary },
-  body: { padding: spacing.xl, gap: spacing.md },
-  category: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5, color: colors.primary },
-  title: { fontSize: 24, fontWeight: '800', lineHeight: 30, color: colors.text },
-  priceRow: { flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: spacing.sm },
-  price: { fontSize: 30, fontWeight: '900', color: colors.text },
-  priceOld: {
-    fontSize: 16,
-    color: colors.textFaint,
-    textDecorationLine: 'line-through',
-    paddingBottom: 4,
-  },
-  discountPill: {
-    backgroundColor: colors.emeraldBg,
-    borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  discountText: { fontSize: 12, fontWeight: '700', color: colors.emerald },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  ratingPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.amberBg,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-  },
-  star: { color: colors.amber },
-  ratingText: { fontSize: 13, fontWeight: '600', color: '#b45309' },
-  meta: { fontSize: 13, color: colors.textMuted },
-  desc: { marginTop: spacing.xs, fontSize: 15, lineHeight: 22, color: colors.textMuted },
-});

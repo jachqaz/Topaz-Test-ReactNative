@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
  * All rights reserved.
  */
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 interface TabIconProps {
   icon: string;
@@ -11,28 +11,26 @@ interface TabIconProps {
   focused: boolean;
 }
 
-/** Icono de pestaña con glifo + etiqueta y realce cuando está activo. */
+/**
+ * Icono de pestaña con glifo + etiqueta y realce cuando está activo.
+ * Usa glifos Unicode para no depender de fuentes de iconos externas.
+ */
 export function TabIcon({ icon, label, color, focused }: TabIconProps) {
   return (
-    <View style={styles.container}>
-      <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+    <View className="items-center justify-center" style={{ width: 72 }}>
+      <View
+        className={`h-8 w-14 items-center justify-center rounded-full ${
+          focused ? 'bg-primary/10 dark:bg-primary/20' : 'bg-transparent'
+        }`}
+      >
         <Text style={{ fontSize: 20, color }}>{icon}</Text>
       </View>
-      <Text style={[styles.label, { color }, focused && styles.labelActive]}>{label}</Text>
+      <Text
+        style={{ color, fontSize: 11 }}
+        className={focused ? 'mt-0.5 font-semibold' : 'mt-0.5'}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { alignItems: 'center', justifyContent: 'center', width: 72 },
-  iconWrap: {
-    height: 30,
-    width: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-  },
-  iconWrapActive: { backgroundColor: 'rgba(37,99,235,0.12)' },
-  label: { marginTop: 2, fontSize: 11 },
-  labelActive: { fontWeight: '700' },
-});
