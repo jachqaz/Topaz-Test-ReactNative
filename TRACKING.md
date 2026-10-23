@@ -111,6 +111,18 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
+### Fix CI 2026-10-23 (5) — causa raíz FINAL: npm 11 (local) vs npm 10 (CI)
+- **Síntoma:** `npm ci` seguía con `EUSAGE` cambiando de paquete (ahora `ws@6.2.6` vs `8.22.0`,
+  `@react-native/metro-config@0.86.3` "Missing"). Regenerar el lock no lo arreglaba de forma estable.
+- **Causa raíz REAL:** el lock se generaba con **npm 11.19.1 (local, Node 24)** pero el CI corría
+  **npm 10.8.2 (Node 22)**. npm 10 y npm 11 resuelven árboles de dependencias distintos para el mismo
+  `package.json` (ubicación/dedup de transitivas como `ws`, `metro-config`), y `npm ci` exige coincidencia
+  exacta. No era un pin de versión que se pudiera "regenerar": era incompatibilidad de la herramienta.
+- **Fix:** alinear el toolchain del CI al que genera el lock. En `ci.yml`: `NODE_VERSION` 22 → **24**
+  y, antes de cada `npm ci`, `npm install -g npm@11`. Así el runner usa npm 11 como local.
+- **Verificación:** `npm ci` REAL local con npm 11.19.1 sobre árbol limpio → instala OK (sin EUSAGE);
+  `tsc` 0, Jest 4/10. Este `npm ci` real reproduce exactamente lo que hará el CI con npm 11.
+
 ### Fix CI 2026-10-23 (4) — lock pineado a 0.86.0 por node_modules cacheado
 - **Síntoma:** `npm ci` seguía con `EUSAGE`: el lock decía `@react-native/jest-preset@0.86.0` y
   `js-polyfills@0.86.0`, pero el CI resolvía `0.86.3` (transitivas de `jest-expo`/`react-native`).
