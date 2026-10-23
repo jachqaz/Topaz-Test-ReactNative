@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 import { useCallback } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { ProductCard } from '../../shared/ui/ProductCard';
 import { useAppSelector } from '../../app/store/hooks';
 import { selectFavorites } from './selectors';
+import { colors, radius, spacing, shadow } from '../../shared/ui/theme';
 import type { Product } from '../../types/product';
 import type { ProductsStackParamList, RootTabParamList } from '../../app/navigation/types';
 
@@ -39,36 +40,29 @@ export function FavoritesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-slate-50 dark:bg-slate-950">
-      <View
-        className="bg-white px-5 pb-4 dark:bg-slate-900"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        <Text className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">
-          Favoritos
-        </Text>
-        <Text className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+    <View style={styles.root}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
+        <Text style={styles.heading}>Favoritos</Text>
+        <Text style={styles.sub}>
           {favorites.length} {favorites.length === 1 ? 'guardado' : 'guardados'}
         </Text>
       </View>
 
       {favorites.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-            <Text className="text-4xl">♡</Text>
+        <View style={styles.emptyWrap}>
+          <View style={styles.emptyCircle}>
+            <Text style={styles.emptyHeart}>♡</Text>
           </View>
-          <Text className="text-center text-lg font-bold text-slate-700 dark:text-slate-200">
-            Todavía no tienes favoritos
-          </Text>
-          <Text className="mt-1 text-center text-sm text-slate-500 dark:text-slate-400">
+          <Text style={styles.emptyTitle}>Todavía no tienes favoritos</Text>
+          <Text style={styles.emptyText}>
             Explora los productos y pulsa el corazón para guardarlos aquí.
           </Text>
           <Pressable
             accessibilityRole="button"
             onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsList' })}
-            className="mt-6 rounded-2xl bg-primary px-6 py-3 active:opacity-80"
+            style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
           >
-            <Text className="font-semibold text-white">Ver productos</Text>
+            <Text style={styles.ctaText}>Ver productos</Text>
           </Pressable>
         </View>
       ) : (
@@ -76,12 +70,47 @@ export function FavoritesScreen() {
           data={favorites}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          contentContainerClassName="p-4 gap-3"
-          contentContainerStyle={{ paddingBottom: 24 }}
-          ItemSeparatorComponent={() => <View className="h-3" />}
+          contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           showsVerticalScrollIndicator={false}
         />
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.lg,
+    ...shadow.header,
+  },
+  heading: { fontSize: 30, fontWeight: '800', color: colors.text },
+  sub: { marginTop: 2, fontSize: 13, color: colors.textMuted },
+  listContent: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  emptyCircle: {
+    height: 80,
+    width: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: colors.surface,
+    marginBottom: spacing.lg,
+    ...shadow.card,
+  },
+  emptyHeart: { fontSize: 36, color: colors.rose },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+  emptyText: { marginTop: 4, textAlign: 'center', fontSize: 14, color: colors.textMuted },
+  cta: {
+    marginTop: spacing.xl,
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
+  },
+  ctaPressed: { opacity: 0.85 },
+  ctaText: { fontWeight: '700', color: colors.white },
+});

@@ -9,13 +9,13 @@ import { ProductsListScreen } from '../../features/products/ProductsListScreen';
 import { ProductDetailScreen } from '../../features/products/ProductDetailScreen';
 import { FavoritesScreen } from '../../features/favorites/FavoritesScreen';
 import { TabIcon } from '../../shared/ui/TabIcon';
+import { colors } from '../../shared/ui/theme';
 import type { ProductsStackParamList, RootTabParamList } from './types';
 
 const Stack = createNativeStackNavigator<ProductsStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-const ACTIVE = '#2563eb';
-const INACTIVE = '#94a3b8';
+const INACTIVE = colors.textFaint;
 
 /** Stack de productos. Cada pantalla pinta su propia cabecera. */
 function ProductsStack() {
@@ -34,17 +34,15 @@ export function RootNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarActiveTintColor: ACTIVE,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: INACTIVE,
         tabBarStyle: {
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingTop: 8,
-          borderTopWidth: 0,
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
           elevation: 12,
-          shadowColor: '#0f172a',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
         },
       }}
     >

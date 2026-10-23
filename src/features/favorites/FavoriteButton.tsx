@@ -2,13 +2,14 @@
  * Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
  * All rights reserved.
  */
-import { Pressable, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
+import { colors, radius, spacing } from '../../shared/ui/theme';
 
 interface FavoriteButtonProps {
   isFavorite: boolean;
@@ -18,7 +19,6 @@ interface FavoriteButtonProps {
 /** Botón de favorito con micro-interacción (rebote al pulsar). */
 export function FavoriteButton({ isFavorite, onToggle }: FavoriteButtonProps) {
   const scale = useSharedValue(1);
-
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const handlePress = () => {
@@ -29,16 +29,27 @@ export function FavoriteButton({ isFavorite, onToggle }: FavoriteButtonProps) {
   return (
     <Pressable accessibilityRole="button" onPress={handlePress}>
       <Animated.View
-        style={animatedStyle}
-        className={`flex-row items-center justify-center gap-2 rounded-2xl px-6 py-4 ${
-          isFavorite ? 'bg-rose-500' : 'bg-primary'
-        } active:opacity-90`}
+        style={[styles.button, { backgroundColor: isFavorite ? colors.rose : colors.primary }, animatedStyle]}
       >
-        <Text className="text-xl text-white">{isFavorite ? '♥' : '♡'}</Text>
-        <Text className="text-base font-bold text-white">
+        <Text style={styles.heart}>{isFavorite ? '♥' : '♡'}</Text>
+        <Text style={styles.label}>
           {isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
         </Text>
       </Animated.View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+  },
+  heart: { fontSize: 20, color: colors.white },
+  label: { fontSize: 16, fontWeight: '700', color: colors.white },
+});

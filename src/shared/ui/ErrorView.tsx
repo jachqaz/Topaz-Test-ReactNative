@@ -2,7 +2,8 @@
  * Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
  * All rights reserved.
  */
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors, radius, spacing } from './theme';
 
 interface ErrorViewProps {
   message?: string;
@@ -12,17 +13,43 @@ interface ErrorViewProps {
 /** Vista de error con acción de reintento. */
 export function ErrorView({ message = 'Algo salió mal.', onRetry }: ErrorViewProps) {
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6 dark:bg-slate-900">
-      <Text className="mb-4 text-center text-base text-red-600 dark:text-red-400">{message}</Text>
+    <View style={styles.container}>
+      <Text style={styles.icon}>⚠️</Text>
+      <Text style={styles.message}>{message}</Text>
       {onRetry ? (
         <Pressable
           accessibilityRole="button"
           onPress={onRetry}
-          className="rounded-xl bg-primary px-5 py-3 active:opacity-80"
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
         >
-          <Text className="font-semibold text-white">Reintentar</Text>
+          <Text style={styles.buttonText}>Reintentar</Text>
         </Pressable>
       ) : null}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxl,
+    backgroundColor: colors.bg,
+  },
+  icon: { fontSize: 40, marginBottom: spacing.md },
+  message: {
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+    fontSize: 15,
+    color: colors.text,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  buttonPressed: { opacity: 0.8 },
+  buttonText: { fontWeight: '700', color: colors.white },
+});
