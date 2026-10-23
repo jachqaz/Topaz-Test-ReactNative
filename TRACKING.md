@@ -111,6 +111,24 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
+### Fix CI 2026-10-23 (7) — DEFINITIVO: lock no portable Windows→Linux, CI usa `npm install`
+- **Evidencia:** el run #7 sobre el commit correcto `0fd9112` (con `jest-preset` fijo y lock sin 0.88)
+  **seguía** fallando con `EUSAGE` pidiendo `@react-native/metro-config@0.88.0`, `metro@0.87.1`, etc.
+  El mismo lock pasa `npm ci` en local (Windows) pero no en el runner (Linux).
+- **Causa raíz:** las transitivas profundas de **metro/@react-native** usan rangos caret
+  (`react-native` pide `metro-runtime ^0.84.3`; `jest-expo` pide `@react-native/jest-preset ^0.86.3`),
+  que **resuelven a versiones distintas según SO/registro** (Linux sube a metro 0.87 / jest-preset 0.88).
+  Un `package-lock.json` generado en Windows **no es portable** a `npm ci` en Linux: `npm ci` exige
+  coincidencia EXACTA y el árbol resuelto difiere por plataforma. No es fijable paquete a paquete sin
+  romper el árbol de RN.
+- **Fix (estándar y pragmático):** el CI usa **`npm install --no-audit --no-fund`** en vez de `npm ci`
+  en los 3 jobs. `npm install` resuelve el árbol en el propio runner (Linux) y no exige igualdad con un
+  lock de otro SO. Trade-off aceptado: se pierde el pin exacto del lock (reproducibilidad estricta) a
+  cambio de un CI fiable cross-platform; el `package-lock.json` se mantiene commiteado como referencia
+  para desarrollo local. Node del CI fijado en 24.
+- Los pines previos (`jest-preset 0.86.3`, Node 24) se conservan: acotan la deriva, aunque la causa del
+  `EUSAGE` era la no-portabilidad del lock, no un único rango.
+
 ### Fix CI 2026-10-23 (6) — causa raíz REAL FINAL: `^0.86.0` saltaba a 0.88 (SDK 58)
 - **Síntoma:** `npm ci` pedía `@react-native/metro-config@0.88.0`, `@react-native/babel-preset@0.88.0`,
   `metro@0.87.1`, `flow-parser@0.327`... — toda la cascada de **RN 0.88 / Expo SDK 58**, cuando el

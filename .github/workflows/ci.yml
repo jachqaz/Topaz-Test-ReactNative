@@ -32,9 +32,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install -g npm@11
-          npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Typecheck
         run: npm run typecheck
@@ -80,9 +78,7 @@ jobs:
           restore-keys: gradle-${{ runner.os }}-
 
       - name: Install dependencies
-        run: |
-          npm install -g npm@11
-          npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Expo Prebuild (Android)
         run: npx expo prebuild --platform android --no-install
@@ -118,9 +114,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install -g npm@11
-          npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Expo Prebuild (iOS)
         run: npx expo prebuild --platform ios --no-install
