@@ -73,7 +73,7 @@ un doble en memoria en los tests (sin JSI nativo).
 
 ## Prerrequisitos
 
-- **Node 20 o superior** (probado con Node 24).
+- **Node 22 o superior** (CI usa Node 22 LTS; probado con Node 24). Algunas dependencias de testing requieren Node ≥ 22.13.
 - **JDK 21** (Temurin/Zulu) y `JAVA_HOME` apuntando a él.
 - **Android Studio** con el Android SDK (Platform 36 / build-tools 36) y un emulador, o un **device físico** con *Depuración USB* activada.
 - `adb` en el `PATH` (viene con el Android SDK, en `platform-tools`).

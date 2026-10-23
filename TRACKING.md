@@ -101,6 +101,16 @@ detalle con carrusel, y favoritos persistidos localmente.
   React 19.2.3), en vez de añadir `--legacy-peer-deps` al CI. `npm install` sin flags y `npm ci --dry-run`
   pasan limpios; lock regenerado. Verificado: `tsc` 0, Jest 4/10 verdes.
 
+### Fix CI 2026-10-23 (2) — EUSAGE lock out-of-sync + EBADENGINE Node
+- **Síntoma:** segundo fallo de `npm ci` con `EUSAGE` (package.json/lock desincronizados: varios paquetes
+  `@react-native/*@0.86.3` "Missing" y un residuo `test-renderer@1.3.1`) y warning `EBADENGINE`
+  (`@testing-library/react-native@14.1.0` requiere Node `^22.13 || >=24`; el CI usaba Node 20).
+- **Fix:** (1) regenerado `package-lock.json` desde cero → `npm ci --dry-run` "up to date"; el lock quedó
+  en sync y con `react-test-renderer@19.2.3`. (2) CI `NODE_VERSION` 20 → **22 LTS** para satisfacer el
+  engine de testing-library; README alineado a "Node 22 o superior". Verificado: `tsc` 0, Jest 4/10.
+- Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
+  (fix 1) es correcto.
+
 ### Documentación 2026-10-23 — nombre del director
 - Reemplazo en la documentación: `Johan A. Hernández (jachqaz)` → `Johan Castano (jachqaz)`;
   menciones de `jachqaz` como autoría → `Johan Castano (jachqaz)`. **No** se tocaron las URLs de
