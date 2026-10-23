@@ -92,6 +92,15 @@ detalle con carrusel, y favoritos persistidos localmente.
   activo, base URL = `localhost:8080/api`, sin mocks que enmascaren). El "no veo consultas" era falta de
   observabilidad, no de conectividad; confirmado dummyjson→back→front.
 
+### Fix CI 2026-10-23 — ERESOLVE en `npm ci`
+- **Síntoma:** el job `Typecheck & Test` fallaba en `npm ci` con `ERESOLVE`:
+  `react-test-renderer@19.3.1` exige `react@^19.3.1`, pero el proyecto fija `react@19.2.3` (Expo SDK 57).
+  Local no fallaba porque `node_modules` se había instalado con `--legacy-peer-deps`; `npm ci` en CI es estricto.
+- **Causa raíz:** peer dependency en conflicto por un rango (`^19.3.1`) incompatible con React 19.2.3.
+- **Fix (estándar, no enmascarado):** fijar `react-test-renderer` a **`19.2.3`** (versión que casa exacto con
+  React 19.2.3), en vez de añadir `--legacy-peer-deps` al CI. `npm install` sin flags y `npm ci --dry-run`
+  pasan limpios; lock regenerado. Verificado: `tsc` 0, Jest 4/10 verdes.
+
 ### Documentación 2026-10-23 — nombre del director
 - Reemplazo en la documentación: `Johan A. Hernández (jachqaz)` → `Johan Castano (jachqaz)`;
   menciones de `jachqaz` como autoría → `Johan Castano (jachqaz)`. **No** se tocaron las URLs de
