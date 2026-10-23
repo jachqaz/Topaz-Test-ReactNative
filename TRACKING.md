@@ -35,6 +35,18 @@ detalle con carrusel, y favoritos persistidos localmente.
 | F13 | CI/CD `.github/workflows/ci.yml`: lint+test+build; jobs Android (.apk) e iOS (.ipa/archive) | FINISH |
 | F14 | Preprocesado commit (Prettier, ESLint, husky, audit) | IN_PROGRESS (headers de copyright aplicados; husky/eslint opcional) |
 | F15 | Verificación final: lint → test → build | FINISH |
+| C1 | **Conexión front→back**: base URL por plataforma (default backend, `localhost:8080/api`), override por `EXPO_PUBLIC_API_BASE_URL`, `.env.example` | FINISH |
+| C2 | **Device físico**: `expo run:android/ios`, `adb reverse` (script `adb:reverse`), nitro-modules, Tailwind v3 | FINISH |
+| C3 | **Rediseño UI/UX**: ProductCard moderno, header+búsqueda en Productos, Detalle con carrusel+indicadores, Favoritos con empty state+CTA | FINISH |
+| C4 | **Navegación clara 3 pantallas**: tab bar moderno con iconos/labels, acceso directo a Favoritos y navegación anidada tab→stack | FINISH |
+| C5 | **Dev overlay (LogBox)** oculto en la app; tema de navegación claro/oscuro | FINISH |
+
+## Correcciones 2026-10-22 (sesión de integración)
+- **Causa raíz conexión:** el front apuntaba por defecto a `https://dummyjson.com` (no al back) y usaba ruta `/products` sin el prefijo `/api`. Corregido: default = backend Topaz en `localhost:8080/api`, resuelto por plataforma, con override por env.
+- **Puerto back:** `server.port=8080` fijo en `application.properties`.
+- **adb reverse:** `tcp:8081` (Metro) + `tcp:8080` (backend) → script `npm run adb:reverse`, documentado en README.
+- **Verificación end-to-end:** `axios → http://localhost:8080/api/products` devuelve 30 productos; `/products/1` devuelve detalle completo. Flujo dummyjson→back→front confirmado.
+- **UI:** rediseño completo manteniendo NativeWind + FlatList + Reanimated. LogBox flotante ocultado (era el "card amarillo" de la imagen 4, overlay de desarrollo de Expo).
 
 ## Verificación (evidencia real 2026-10-22)
 - `npx tsc --noEmit` → **exit 0** (TypeScript estricto limpio).

@@ -11,24 +11,67 @@ interface ProductCardProps {
   onPress: (id: number) => void;
 }
 
-/** Ítem de producto para la FlatList: thumbnail, título y precio. */
+/**
+ * Ítem de producto para la FlatList. Tarjeta moderna: thumbnail, título,
+ * categoría, rating y precio destacado. Pensado para toque cómodo y legible.
+ */
 function ProductCardComponent({ product, onPress }: ProductCardProps) {
+  const hasDiscount = product.discountPercentage > 0;
+  const finalPrice = hasDiscount
+    ? product.price * (1 - product.discountPercentage / 100)
+    : product.price;
+
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={`Ver ${product.title}`}
       onPress={() => onPress(product.id)}
-      className="flex-row items-center gap-3 rounded-2xl bg-white p-3 active:opacity-80 dark:bg-slate-800"
+      className="flex-row items-center gap-4 rounded-3xl bg-white p-3 shadow-sm active:scale-[0.98] active:opacity-90 dark:bg-slate-800"
+      style={{
+        shadowColor: '#0f172a',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
+      }}
     >
       <Image
         source={{ uri: product.thumbnail }}
-        className="h-16 w-16 rounded-xl bg-slate-100 dark:bg-slate-700"
+        className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-700"
         resizeMode="cover"
       />
       <View className="flex-1">
-        <Text numberOfLines={2} className="font-semibold text-slate-900 dark:text-slate-100">
+        {product.category ? (
+          <Text className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary dark:text-blue-400">
+            {product.category}
+          </Text>
+        ) : null}
+        <Text
+          numberOfLines={2}
+          className="text-base font-bold leading-5 text-slate-900 dark:text-slate-100"
+        >
           {product.title}
         </Text>
-        <Text className="mt-1 text-primary dark:text-blue-400">${product.price.toFixed(2)}</Text>
+        <View className="mt-1.5 flex-row items-center gap-2">
+          {product.rating ? (
+            <View className="flex-row items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 dark:bg-amber-500/15">
+              <Text className="text-xs text-amber-500">★</Text>
+              <Text className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                {product.rating.toFixed(1)}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
+      <View className="items-end">
+        <Text className="text-lg font-extrabold text-slate-900 dark:text-slate-50">
+          ${finalPrice.toFixed(2)}
+        </Text>
+        {hasDiscount ? (
+          <Text className="text-xs font-medium text-slate-400 line-through dark:text-slate-500">
+            ${product.price.toFixed(2)}
+          </Text>
+        ) : null}
       </View>
     </Pressable>
   );

@@ -12,7 +12,7 @@ const product: Product = {
   description: 'desc',
   category: 'beauty',
   price: 14.99,
-  discountPercentage: 9.84,
+  discountPercentage: 0,
   rating: 4.64,
   stock: 89,
   brand: 'Velvet Touch',

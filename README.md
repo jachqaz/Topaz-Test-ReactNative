@@ -23,7 +23,7 @@ ver su detalle y guardar favoritos localmente.
 | Estado | Redux Toolkit + RTK Query |
 | Persistencia | MMKV con `StorageAdapter` (interfaz única) + fallback InMemory + mock Jest |
 | Estilos | NativeWind (Tailwind) con dark mode |
-| Networking | Axios (baseURL configurable) |
+| Networking | Axios (base URL por plataforma, default = backend Topaz) |
 | Navegación | React Navigation (Bottom Tabs + Stack) |
 | Animación | Reanimated (micro-interacción en favorito) |
 | Testing | Jest + react-test-renderer |
@@ -59,23 +59,62 @@ un doble en memoria en los tests (sin JSI nativo).
 
 - Node 24 (`vfox use node@24`)
 - Para builds nativos: Android Studio / Xcode (Expo Prebuild)
+- **Development Build** (NO Expo Go): la app usa MMKV (JSI) y New Architecture.
 
-## Ejecución
+## Ejecución en device físico Android (USB)
+
+Estos son los cambios aplicados para compilar y correr en un **device físico**:
+
+- `npm run android` / `npm run ios` ahora usan `expo run:android` / `expo run:ios`
+  (Development Build nativo), en vez de `expo start --android` (que requería Expo Go).
+- Dependencias nativas añadidas: `react-native-nitro-modules` (requerida por MMKV v4)
+  y `@react-native-community/cli`.
+- `tailwindcss` fijado a `3.4.19` (NativeWind 4 no es compatible con Tailwind 4).
 
 ```bash
 npm install
-npx expo prebuild        # genera android/ e ios/ (CNG)
-npx expo run:android     # Development Build en Android
-npx expo run:ios         # Development Build en iOS (requiere macOS)
+npx expo prebuild                # genera android/ e ios/ (CNG) — solo la 1ª vez o al cambiar nativo
+npm run adb:reverse              # adb reverse tcp:8081 + tcp:8080  (Metro + backend)
+npm run android                  # compila e instala el Development Build en el device
 ```
 
-### Apuntar al backend Topaz
+## Conexión con el backend Topaz (reproducible)
+
+El backend corre **siempre en el puerto 8080** (`server.port=8080`). El front
+resuelve la URL base automáticamente según la plataforma, sin configuración:
+
+| Plataforma | URL base por defecto | Requisito |
+|-----------|----------------------|-----------|
+| Android (device USB) | `http://localhost:8080/api` | `npm run adb:reverse` |
+| Android (emulador) | `http://localhost:8080/api` | `adb reverse` (o usa `10.0.2.2` vía override) |
+| iOS simulador / Web | `http://localhost:8080/api` | backend corriendo en el host |
+
+**Paso clave para device físico y emulador** — mapea los puertos del PC al teléfono:
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL=http://localhost:8080/api npx expo start
+adb reverse tcp:8081 tcp:8081   # Metro (bundler)
+adb reverse tcp:8080 tcp:8080   # Backend Topaz
+# atajo: npm run adb:reverse
 ```
 
-Sin esa variable, la app consume DummyJSON directamente (`https://dummyjson.com`).
+Con esto, `localhost:8080` dentro del teléfono apunta al backend del PC. El flujo
+de datos es **DummyJSON → backend (BFF) → frontend**.
+
+### Override con túnel o IP LAN (opcional)
+
+Si no usas USB/`adb reverse` (p. ej. expones el back con un túnel), define
+`EXPO_PUBLIC_API_BASE_URL` (ver `.env.example`):
+
+```bash
+# Túnel Cloudflare (URL temporal, cámbiala por la tuya):
+EXPO_PUBLIC_API_BASE_URL=https://xxxxx.trycloudflare.com/api npm run android
+
+# IP del PC en la LAN (device y PC en la misma Wi-Fi):
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.50:8080/api npm run android
+
+# Contingencia sin backend (DummyJSON directo):
+EXPO_PUBLIC_API_BASE_URL=https://dummyjson.com npm run android
+```
 
 ## Testing
 

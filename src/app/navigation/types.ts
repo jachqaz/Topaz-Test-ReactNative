@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { NavigatorScreenParams } from '@react-navigation/native';
 
 /** Rutas del stack de productos. */
 export type ProductsStackParamList = {
@@ -10,9 +11,9 @@ export type ProductsStackParamList = {
   ProductDetail: { id: number };
 };
 
-/** Rutas del bottom tab. */
+/** Rutas del bottom tab. El tab de productos anida el stack. */
 export type RootTabParamList = {
-  ProductsTab: undefined;
+  ProductsTab: NavigatorScreenParams<ProductsStackParamList> | undefined;
   FavoritesTab: undefined;
 };
 
