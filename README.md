@@ -18,7 +18,7 @@ ver su detalle y guardar favoritos localmente.
 
 | Aspecto | Elección |
 |---------|----------|
-| Entorno | Expo SDK 58 · Prebuild/CNG + Expo Modules + Development Builds (sin Expo Go) |
+| Entorno | Expo SDK 57 · Prebuild/CNG + Expo Modules + Development Builds (sin Expo Go) |
 | Lenguaje | TypeScript estricto |
 | Estado | Redux Toolkit + RTK Query |
 | Persistencia | MMKV con `StorageAdapter` (interfaz única) + fallback InMemory + mock Jest |
@@ -134,8 +134,9 @@ npm run typecheck        # TypeScript estricto
 
 ## Notas técnicas
 
-- Expo SDK 58 corre New Architecture siempre; MMKV v4 (Nitro) usa `createMMKV`.
-- Los tests de componente usan `react-test-renderer` directo por compatibilidad con RN 0.88 / React 19.3.
+- Expo SDK 57 (RN 0.86 · React 19.2) corre New Architecture; MMKV v4 (Nitro) usa `createMMKV`.
+- Estilos con **NativeWind 4.2.7** (soporte oficial SDK 57). En SDK 58 NativeWind 4.2.7 no transforma `className` (incompatibilidad), por eso se fijó SDK 57.
+- Los tests de componente usan `react-test-renderer` directo por compatibilidad con React 19.
 
 ## Estado
 

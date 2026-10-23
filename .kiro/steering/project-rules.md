@@ -5,7 +5,7 @@ Desarrollador Senior React Native + UI/UX + Tester. Guiado por el director de or
 Owner end-to-end del resultado.
 
 ## Stack y decisiones FIJAS (no reabrir sin orden del director)
-- **Entorno:** Expo SDK 58 · Prebuild/CNG + Expo Modules + Development Builds (sin Expo Go). `android/`+`ios/` son artefactos generados (`npx expo prebuild`).
+- **Entorno:** Expo SDK 57 · Prebuild/CNG + Expo Modules + Development Builds (sin Expo Go). `android/`+`ios/` son artefactos generados (`npx expo prebuild`).
 - **Lenguaje:** TypeScript estricto.
 - **Estado global:** Redux Toolkit; datos de servidor vía **RTK Query** (o service Axios). Favoritos en slice persistido.
 - **Persistencia:** **MMKV** con `StorageAdapter` (interfaz única) + fallback (AsyncStorage/InMemory) + mock Jest (`react-native-mmkv/jest`). El store recibe el storage por INYECCIÓN (no instanciar MMKV dentro del slice).

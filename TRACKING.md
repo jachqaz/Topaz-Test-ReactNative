@@ -7,7 +7,7 @@
 
 **Director de orquesta:** jachqaz (`jach_1997@hotmail.com`) · **Agente:** Kiro (Auto), guiado por el director.
 **Repo:** https://github.com/jachqaz/Topaz-Test-ReactNative.git · **Rama de trabajo:** `develop`
-**Stack:** Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript estricto.
+**Stack:** Expo SDK 57 · React Native 0.86 · React 19.2 · TypeScript estricto.
 
 > Estados: `TODO` · `IN_PROGRESS` · `FINISH`. Política: **solo commits locales, nunca push** (lo hace el director).
 
@@ -48,6 +48,16 @@ detalle con carrusel, y favoritos persistidos localmente.
 - **Causa raíz REAL:** **caché del transformer de Metro.** `npx expo run:android` recompila el binario nativo, pero Metro reutiliza su caché de transform salvo que se arranque con `--clear`. Tras cambiar `tailwindcss` v4→v3, Metro siguió sirviendo el bundle transformado con la config vieja, por eso los `className` no aplicaban. NO era incompatibilidad de NativeWind.
 - **Solución (correcta, según directriz):** se MANTIENE NativeWind (Tailwind) como capa de estilos. Un intento intermedio de migrar a StyleSheet se revirtió porque contradecía la decisión del director. El fix operativo es arrancar Metro limpio: `npx expo start --clear` (o `npm run android` con Metro ya limpio).
 - **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests verdes. Validación visual en device tras `--clear` (pendiente de confirmación del director).
+
+### Diagnóstico definitivo 2026-10-23 (banner de prueba)
+- Se añadió un banner con estilo INLINE + un texto con `className` de NativeWind. Resultado en device: **el banner inline SÍ se vio (bundle correcto, estilos inline OK), pero el `className` NO aplicó** (sin fondo verde). Caso B: NativeWind no transforma `className`.
+- **Causa raíz CONFIRMADA:** NativeWind 4.2.7 (el `latest`) soporta oficialmente hasta Expo SDK 57. En **SDK 58**, `babel-preset-expo` cambió el pipeline JSX y el transform de `react-native-css-interop` 0.2.7 no engancha. No es caché ni config (idéntica a la oficial): es **incompatibilidad de versión**.
+
+### Resolución 2026-10-23 — DOWNGRADE a Expo SDK 57
+- Decisión del director (opción 2): **bajar a Expo SDK 57**, donde NativeWind 4.2.7 funciona oficialmente, manteniendo Tailwind/`className`.
+- Cambios: `expo@~57.0.23` + `npx expo install --fix` → RN 0.86.3, React 19.2.3, reanimated 4.5.1, worklets 0.10.1, gesture-handler 2.32; `@react-native/jest-preset@^0.86`; `expo-system-ui` (userInterfaceStyle); `app.json` sin `newArchEnabled` (removido del schema en SDK 57), `web.bundler=metro`.
+- Regeneración nativa: `npx expo prebuild --clean` (android/ e ios/ para SDK 57).
+- **Verificación:** `tsc --noEmit` exit 0; `jest` 4 suites / 10 tests; **`expo-doctor` 21/21 checks OK**. Validación visual del rediseño NativeWind en device pendiente de recompilar (`npx expo run:android`).
 
 ## Correcciones 2026-10-22 (sesión de integración)
 - **Causa raíz conexión:** el front apuntaba por defecto a `https://dummyjson.com` (no al back) y usaba ruta `/products` sin el prefijo `/api`. Corregido: default = backend Topaz en `localhost:8080/api`, resuelto por plataforma, con override por env.
