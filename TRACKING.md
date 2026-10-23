@@ -111,6 +111,15 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
+### Fix CI 2026-10-23 (4) — lock pineado a 0.86.0 por node_modules cacheado
+- **Síntoma:** `npm ci` seguía con `EUSAGE`: el lock decía `@react-native/jest-preset@0.86.0` y
+  `js-polyfills@0.86.0`, pero el CI resolvía `0.86.3` (transitivas de `jest-expo`/`react-native`).
+- **Causa raíz:** el `node_modules` local tenía `0.86.0` cacheado de instalaciones previas, así que
+  cada regeneración del lock lo congelaba en 0.86.0; el CI, limpio, bajaba 0.86.3 → mismatch.
+- **Fix:** borrado `node_modules` + lock y reinstalado desde cero (resolución fresca, como el CI).
+  El lock ahora captura `@react-native/jest-preset@0.86.3` y `js-polyfills@0.86.3`.
+  `npm ci --dry-run` "up to date"; `tsc` 0, Jest 4/10.
+
 ### Fix CI 2026-10-23 (3) — causa raíz: @testing-library sin usar con peer rota
 - **Síntoma persistente:** `npm ci` seguía fallando con `EUSAGE` (lock out-of-sync) y
   `Missing: test-renderer@1.3.1`, más `EBADENGINE` (Node ≥22.13).
