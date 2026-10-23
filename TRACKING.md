@@ -111,6 +111,21 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
+### Fix CI 2026-10-23 (6) — causa raíz REAL FINAL: `^0.86.0` saltaba a 0.88 (SDK 58)
+- **Síntoma:** `npm ci` pedía `@react-native/metro-config@0.88.0`, `@react-native/babel-preset@0.88.0`,
+  `metro@0.87.1`, `flow-parser@0.327`... — toda la cascada de **RN 0.88 / Expo SDK 58**, cuando el
+  proyecto es SDK 57 (RN 0.86). Los fixes anteriores (npm 11, borrar cache) no bastaban porque atacaban
+  el síntoma, no la causa.
+- **Causa raíz:** `@react-native/jest-preset: "^0.86.0"` — el `^` permite cualquier `0.x ≥ 0.86`,
+  incluido **0.88.0**. Al resolver fresco (CI), npm subía jest-preset a 0.88, que arrastra metro 0.87 y
+  el babel-preset de RN 0.88. El lock (fijado a 0.86.x) nunca casaba con esa resolución.
+- **Fix (raíz):** fijar `@react-native/jest-preset` a **`0.86.3`** exacto (igual que `react-native` está
+  en `0.86.3`), eliminando el salto de SDK. Lock regenerado desde cero: **0** referencias a 0.88/metro
+  0.87; `npm ci` REAL instala 929 paquetes sin `EUSAGE`.
+- **Verificación:** `npm ci` real sobre árbol limpio OK; `tsc` 0; Jest 4/10.
+- Nota: el pin de npm@11 + Node 24 del fix (5) se conserva (reproducibilidad del toolchain), pero la
+  causa del `EUSAGE` era este rango abierto, no la versión de npm.
+
 ### Fix CI 2026-10-23 (5) — causa raíz FINAL: npm 11 (local) vs npm 10 (CI)
 - **Síntoma:** `npm ci` seguía con `EUSAGE` cambiando de paquete (ahora `ws@6.2.6` vs `8.22.0`,
   `@react-native/metro-config@0.86.3` "Missing"). Regenerar el lock no lo arreglaba de forma estable.
