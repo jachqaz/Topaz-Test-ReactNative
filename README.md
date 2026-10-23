@@ -11,9 +11,10 @@ ver su detalle y guardar favoritos localmente.
 
 ## Modelo de trabajo: orquestación humano + agente
 
-Este proyecto no se construyó "tirando prompts". Se desarrolló bajo un modelo de
-**orquestación dirigida**, donde un profesional define la ingeniería y un agente de
-IA la ejecuta con evidencia y trazabilidad:
+Este proyecto se construyó bajo un modelo de **orquestación dirigida de IA**, donde un
+profesional define la ingeniería y un agente de IA la ejecuta con evidencia y trazabilidad.
+No se trata de generación automática sin control, sino de un proceso de desarrollo
+supervisado en el que cada decisión técnica es dirigida, verificada y documentada:
 
 - **Director de orquesta — Johan Castano (`jachqaz`).** Dueño de la arquitectura
   y las decisiones técnicas: fija el stack (Expo Prebuild/CNG, Redux Toolkit + RTK Query,
@@ -25,10 +26,11 @@ IA la ejecuta con evidencia y trazabilidad:
   accionable: implementa, instrumenta, mide y verifica (typecheck, tests, builds, logs),
   y reporta con datos. Trabaja guiado, dentro de las decisiones y restricciones del director.
 
-El valor está en la **dirección especializada**: saber qué pedir, cómo acotar el problema,
-qué evidencia exigir y cuándo rechazar una solución. El agente acelera la ejecución; el
-criterio de ingeniería y la responsabilidad del resultado son del director. La trazabilidad
-de cada decisión (qué, por qué y con qué evidencia) vive en `TRACKING.md`.
+El valor reside en la **dirección técnica especializada**: la definición precisa de los
+requisitos, la delimitación del alcance, la exigencia de evidencia verificable y el criterio
+para rechazar soluciones inadecuadas. El agente acelera la ejecución; el criterio de ingeniería
+y la responsabilidad del resultado corresponden al director. La trazabilidad de cada decisión
+(qué, por qué y con qué evidencia) se documenta en `TRACKING.md`.
 
 ## Stack y decisiones
 

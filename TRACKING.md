@@ -111,6 +111,25 @@ detalle con carrusel, y favoritos persistidos localmente.
 - Nota: el `EUSAGE` provino del lock de un commit anterior ejecutado en CI; el lock ya commiteado
   (fix 1) es correcto.
 
+### Fix CI 2026-10-23 (3) — causa raíz: @testing-library sin usar con peer rota
+- **Síntoma persistente:** `npm ci` seguía fallando con `EUSAGE` (lock out-of-sync) y
+  `Missing: test-renderer@1.3.1`, más `EBADENGINE` (Node ≥22.13).
+- **Causa raíz:** `@testing-library/react-native@14.1.0` declara una **peerDependency inusual
+  `test-renderer@^1.0.0`** (no es `react-test-renderer`), que npm intentaba resolver a un paquete
+  no relacionado (`test-renderer@1.3.1`), y además exige Node ≥22.13. **Ni testing-library ni
+  `@testing-library/jest-native` se usaban** en el proyecto (los tests usan `react-test-renderer`
+  directo; `jest.setup.js` solo mockea MMKV).
+- **Fix (raíz):** eliminadas `@testing-library/react-native` y `@testing-library/jest-native` del
+  `package.json` (dependencias muertas). Lock regenerado desde cero: 0 referencias a `test-renderer`
+  fantasma y 0 a `@testing-library`; `npm ci --dry-run` "up to date". Verificado `tsc` 0, Jest 4/10.
+- Corregido también el header de `jest.setup.js` (nombre del director).
+
+### Documentación 2026-10-23 (2) — redacción profesional de los README
+- Reemplazada la expresión informal "tirando prompts" por una redacción profesional equivalente
+  ("orquestación dirigida de IA... proceso de desarrollo supervisado"). Revisadas y pulidas otras
+  frases coloquiales ("saber qué pedir" → "definición precisa de requisitos, delimitación del
+  alcance, exigencia de evidencia verificable"). Tono y contenido preservados.
+
 ### Documentación 2026-10-23 — nombre del director
 - Reemplazo en la documentación: `Johan A. Hernández (jachqaz)` → `Johan Castano (jachqaz)`;
   menciones de `jachqaz` como autoría → `Johan Castano (jachqaz)`. **No** se tocaron las URLs de

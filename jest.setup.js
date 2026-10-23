@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Johan A. Hernández (jachqaz). Topaz ReactNative.
+ * Copyright (c) 2026 Johan Castano (jachqaz). Topaz ReactNative.
  * All rights reserved.
  */
 /* eslint-disable @typescript-eslint/no-require-imports */
